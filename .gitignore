@@ -2,3 +2,5 @@
 # Webstrom
 
 .idea
+node_modules
+example-native/android/app/build
