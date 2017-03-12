@@ -1,0 +1,183 @@
+
+const _ = require('lodash');
+
+describe('Fbsimctl', () => {
+  let Fbsimctl;
+  let fbsimctl;
+  let exec;
+  let fs;
+
+  const simUdid = `9C9ABE4D-70C7-49DC-A396-3CB1D0E82846`;
+  const bundleId = 'bundle.id';
+
+  beforeEach(() => {
+    jest.mock('npmlog');
+    jest.mock('fs');
+    fs = require('fs');
+    jest.mock('../utils/exec');
+    exec = require('../utils/exec').execWithRetriesAndLogs;
+    Fbsimctl = require('./Fbsimctl');
+    fbsimctl = new Fbsimctl();
+  });
+
+  it(`list() - specify a valid simulator should return that simulator's UDID`, async() => {
+    const result = returnSuccessfulWithValue(listAsimUdidAtState(simUdid, "Shutdown"));
+    exec.mockReturnValue(Promise.resolve(result));
+
+    expect(await fbsimctl.list('iPhone 7')).toEqual(simUdid);
+  });
+
+  it(`list() - specify an invalid simulator should throw an Error`, async() => {
+    const returnValue = {};
+    const result = returnSuccessfulWithValue(returnValue);
+    exec.mockReturnValue(Promise.resolve(result));
+
+    try {
+      await fbsimctl.list('iPhone 7');
+      fail('expected list() to throw');
+    } catch (object) {
+      expect(object).toBeDefined();
+    }
+  });
+
+  it(`list() - when something goes wrong in the list retrival process, log the given error error`, async() => {
+    const returnValue = {};
+    const result = returnErrorWithValue(returnValue);
+    exec.mockReturnValue(Promise.reject(result));
+
+    try {
+      await fbsimctl.list('iPhone 7');
+      fail('expected list() to throw');
+    } catch (object) {
+      expect(object).toBeDefined();
+    }
+  });
+
+  it(`boot() - is triggering fbsimctl boot`, async() => {
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.boot(simUdid));
+  });
+
+  it(`install() - is triggering fbsimctl install`, async() => {
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.install(simUdid, bundleId, {}));
+  });
+
+  it(`uninstall() - is triggering fbsimctl uninstall`, async() => {
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.uninstall(simUdid, bundleId));
+  });
+
+  it(`launch() - is triggering fbsimctl launch`, async() => {
+    fs.existsSync.mockReturnValue(true);
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.launch(simUdid, bundleId, []));
+  });
+
+  it(`launch() - is triggering fbsimctl launch when no Detox.framework exists`, async() => {
+    fs.existsSync.mockReturnValue(false);
+    fbsimctl._execFbsimctlCommand = jest.fn();
+    try {
+      await fbsimctl.launch(simUdid, bundleId, []);
+      fail(`should fail when Detox.framework doesn't exist`);
+    } catch (ex) {
+      expect(ex).toBeDefined();
+    }
+  });
+
+  it(`terminate() - is triggering fbsimctl terminate`, async() => {
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.terminate(simUdid, bundleId));
+  });
+
+  it(`shutdown() - is triggering fbsimctl shutdown`, async() => {
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.shutdown(simUdid));
+  });
+
+  it(`open() - is triggering fbsimctl open`, async() => {
+    await validateFbsimctlisCalledOn(fbsimctl, async () => fbsimctl.open(simUdid, bundleId));
+  });
+
+  it(`isDeviceBooted() - specify a shutdown simulator`, async() => {
+    fbsimctl._execFbsimctlCommand = jest.fn(() => {
+      return returnSuccessfulWithValue(listAsimUdidAtState(simUdid, `Shutdown`));
+    });
+    const isDeviceBooted = await fbsimctl.isDeviceBooted(simUdid);
+    expect(isDeviceBooted).toBe(true);
+  });
+
+  it(`isDeviceBooted() - specify a booted simulator`, async() => {
+    fbsimctl._execFbsimctlCommand = jest.fn(() => {
+      return returnSuccessfulWithValue(listAsimUdidAtState(simUdid, `Booted`));
+    });
+    const isDeviceBooted = await fbsimctl.isDeviceBooted(simUdid);
+    expect(isDeviceBooted).toBe(false);
+  });
+
+  it(`exec simulator command successfully`, async() => {
+    const result = returnSuccessfulWithValue("");
+    exec.mockReturnValue(Promise.resolve(result));
+    const options = {args: `an argument`};
+    expect(await fbsimctl._execFbsimctlCommand(options)).toEqual(result);
+  });
+
+  it(`exec simulator command with error`, async() => {
+    const errorResult = returnErrorWithValue('');
+    exec.mockReturnValue(Promise.reject(errorResult));
+    const options = {args: `an argument`};
+    
+    try {
+      await fbsimctl._execFbsimctlCommand(options, '', 10, 1);
+    } catch (object) {
+      expect(object).toEqual(errorResult);
+    }
+  });
+
+  it(`exec simulator command with multiple errors and then a success`, async() => {
+    const successfulResult = returnSuccessfulWithValue('successful result');
+    const resolvedPromise = Promise.resolve(successfulResult);
+
+    exec.mockReturnValueOnce(resolvedPromise);
+  
+    const options = {args: `an argument`};
+    expect(await fbsimctl._execFbsimctlCommand(options, '', 10, 1)).toEqual(successfulResult);
+  });
+});
+
+async function validateFbsimctlisCalledOn(fbsimctl, func) {
+  fbsimctl._execFbsimctlCommand = jest.fn();
+  func();
+  expect(fbsimctl._execFbsimctlCommand).toHaveBeenCalledTimes(1);
+}
+
+function listAsimUdidAtState(udid, state) {
+  return {
+    "event_type": "discrete",
+    "timestamp": 1485328213,
+    "subject": {
+      "state": state,
+      "os": "iOS 10.1",
+      "name": "iPhone 7",
+      "udid": udid,
+      "device-name": "iPhone 7"
+    },
+    "event_name": "list"
+  };
+}
+
+function returnSuccessfulWithValue(value) {
+  const result = {
+    stdout: JSON.stringify(value),
+    stderr: "",
+    childProcess: {
+      exitCode: 0
+    }
+  };
+  return result;
+}
+
+function returnErrorWithValue(value) {
+  const result = {
+    stdout: "",
+    stderr: value,
+    childProcess: {
+      exitCode: 1
+    }
+  };
+  return result;
+}

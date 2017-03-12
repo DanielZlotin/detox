@@ -1,10 +1,20 @@
 test
 ios/EarlGrey/Demo
 ios/EarlGrey/docs
-ios/EarlGrey/Tests
+ios/EarlGrey/OCHamcrest.framework
+ios/EarlGrey/fishhook
+ios/EarlGrey/Tests/UnitTests/ocmock
+ios/EarlGrey/Tests/UnitTests/TestRig/Resources
+ios/EarlGrey/Tests/FunctionalTests/TestRig/Resources
+ios/
+
 build/
 DerivedData/
+DetoxBuild/
+Detox.framework/
 
+
+src/**/*.test.js
 
 #################
 # from .gitignore
@@ -221,4 +231,3 @@ buck-out/
 \.buckd/
 android/app/libs
 android/keystores/debug.keystore
-

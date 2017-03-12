@@ -38,11 +38,12 @@
     NSData *jsonData = [NSJSONSerialization dataWithJSONObject:data options:kNilOptions error:&error];
     if (jsonData == nil)
     {
-        NSLog(@"Detox Error: sendAction encode - %@", error);
+        NSLog(@"☣️ DETOX:: Error: sendAction encode - %@", error);
         return;
     }
+    NSLog(@"☣️ DETOX:: Detox Action Sent: %@", type);
     NSString *json = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
-    [self.websocket sendString:json];
+    [self.websocket sendString:json error:NULL];
 }
 
 - (void) receiveAction:(NSString*)json
@@ -52,28 +53,29 @@
     NSDictionary *data = [NSJSONSerialization JSONObjectWithData:jsonData options:kNilOptions error:&error];
     if (data == nil)
     {
-        NSLog(@"Detox Error: receiveAction decode - %@", error);
+        NSLog(@"☣️ DETOX:: Error: receiveAction decode - %@", error);
         return;
     }
     NSString *type = [data objectForKey:@"type"];
     if (type == nil)
     {
-        NSLog(@"Detox Error: receiveAction missing type");
+        NSLog(@"☣️ DETOX:: Error: receiveAction missing type");
         return;
     }
     NSDictionary *params = [data objectForKey:@"params"];
     if (params != nil && ![params isKindOfClass:[NSDictionary class]])
     {
-        NSLog(@"Detox Error: receiveAction invalid params");
+        NSLog(@"☣️ DETOX:: Error: receiveAction invalid params");
         return;
     }
+    NSLog(@"☣️ DETOX:: Detox Action Received: %@", type);
     if (self.delegate) [self.delegate websocketDidReceiveAction:type withParams:params];
 }
 
 - (void)webSocketDidOpen:(SRWebSocket *)webSocket
 {
     [self sendAction:@"login" withParams:@{@"sessionId": self.sessionId, @"role": @"testee"}];
-    [self sendAction:@"ready" withParams:@{}];
+    if (self.delegate) [self.delegate websocketDidConnect];
 }
 
 - (void)webSocket:(SRWebSocket *)webSocket didReceiveMessageWithString:(NSString *)string
@@ -83,12 +85,12 @@
 
 - (void)webSocket:(SRWebSocket *)webSocket didFailWithError:(NSError *)error
 {
-    NSLog(@"Detox Error: %@", error);
+    NSLog(@"☣️ DETOX:: Error: %@", error);
 }
 
 - (void)webSocket:(SRWebSocket *)webSocket didCloseWithCode:(NSInteger)code reason:(NSString *)reason wasClean:(BOOL)wasClean
 {
-    NSLog(@"Detox Closed: %@", reason);
+    NSLog(@"☣️ DETOX:: Closed: %@", reason);
 }
 
 @end

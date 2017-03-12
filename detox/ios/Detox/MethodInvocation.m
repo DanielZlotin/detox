@@ -53,6 +53,18 @@
         if (![value isKindOfClass:[NSNumber class]]) return nil;
         return value;
     }
+    if ([type isEqualToString:@"NSInteger"])
+    {
+        if (![value isKindOfClass:[NSNumber class]]) return nil;
+        NSInteger v = [value integerValue];
+        return [NSNumber numberWithInteger:v];
+    }
+    if ([type isEqualToString:@"CGFloat"])
+    {
+        if (![value isKindOfClass:[NSNumber class]]) return nil;
+        CGFloat v = [value doubleValue];
+        return [NSNumber numberWithDouble:v];
+    }
     if ([type isEqualToString:@"CGRect"])
     {
         if (![value isKindOfClass:[NSDictionary class]]) return nil;
@@ -150,6 +162,16 @@
 + (void) invocation:(NSInvocation*)invocation setNonPointerArg:(NSValue*)value atIndex:(NSInteger)idx
 {
     NSString *type = [NSString stringWithUTF8String:value.objCType];
+    if ([type isEqualToString:@"q"])
+    {
+        NSInteger v = [(NSNumber*)value integerValue];
+        [invocation setArgument:&v atIndex:idx];
+    }
+    if ([type isEqualToString:@"d"])
+    {
+        CGFloat v = [(NSNumber*)value doubleValue];
+        [invocation setArgument:&v atIndex:idx];
+    }
     if ([type isEqualToString:@"{CGPoint=dd}"])
     {
         CGPoint v = [value CGPointValue];

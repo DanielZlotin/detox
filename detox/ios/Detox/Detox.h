@@ -6,14 +6,10 @@
 //  Copyright © 2016 Wix. All rights reserved.
 //
 
-#import <UIKit/UIKit.h>
+@import Foundation;
 
 //! Project version number for Detox.
 FOUNDATION_EXPORT double DetoxVersionNumber;
 
 //! Project version string for Detox.
 FOUNDATION_EXPORT const unsigned char DetoxVersionString[];
-
-#import <Detox/DetoxManager.h>
-
-

@@ -4,7 +4,10 @@
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
-  "version": "2.5.2",
+  "version": "4.3.2",
+  "bin": {
+    "detox": "./scripts/detox.js"
+  },
   "repository": {
     "type": "git",
     "url": "https://github.com/wix/detox.git"
@@ -18,20 +21,33 @@
   "author": "Tal Kol <talkol@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "BABEL_ENV=test babel src -d lib",
+    "build": "scripts/build.sh",
+    "lint": "eslint src",
     "test-install": "node scripts/test-install.js",
     "test-clean": "node scripts/test-clean.js",
-    "test-update-js": "node scripts/test-update-js.js",
     "test-update-native": "node scripts/test-update-native.js",
-    "test": "node scripts/test.js"
+    "test": "node scripts/test.js",
+    "start-server": "node scripts/start-server.js",
+    "start-packager": "node scripts/start-packager.js",
+    "test-exec": "node scripts/test-exec.js",
+    "unit": "jest --coverage --verbose",
+    "unit:watch": "jest --watch --trace-warnings --coverage --verbose",
+    "postinstall": "scripts/postinstall.sh",
+    "prepublish": "npm run build"
   },
   "devDependencies": {
     "babel-cli": "^6.8.0",
     "babel-core": "^6.8.0",
     "babel-eslint": "^6.0.4",
     "babel-polyfill": "^6.8.0",
-    "babel-preset-react-native-stage-0": "^1.0.0",
+    "babel-preset-latest": "^6.22.0",
     "babel-register": "^6.8.0",
+    "colors": "^1.1.2",
+    "eslint": "3.x.x",
+    "eslint-plugin-babel": "4.x.x",
+    "eslint-plugin-promise": "^3.4.2",
+    "jest": "^18.1.0",
+    "minimist": "^1.2.0",
     "shelljs": "^0.7.3",
     "ttab": "^0.3.1"
   },
@@ -39,14 +55,26 @@
     "env": {
       "test": {
         "presets": [
-          "react-native-stage-0"
+          "latest"
         ],
         "retainLines": true
       }
     }
   },
   "dependencies": {
-    "mocha": "^2.5.3",
-    "bplist-parser": "^0.1.1"
+    "child-process-promise": "^2.2.0",
+    "commander": "^2.9.0",
+    "lodash": "^4.14.1",
+    "npmlog": "^4.0.2",
+    "react-native-invoke": "^0.2.1",
+    "ws": "^1.1.1"
+  },
+  "jest": {
+    "testPathDirs": [
+      "node_modules",
+      "src"
+    ],
+    "resetMocks": true,
+    "resetModules": true
   }
 }

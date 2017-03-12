@@ -3,16 +3,19 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "start": "node node_modules/react-native/local-cli/cli.js start",
-    "e2e": "./node_modules/.bin/mocha e2e --opts ./e2e/mocha.opts"
+    "packager": "react-native start",
+    "detox-server": "detox-server",
+    "e2e": "mocha e2e --opts ./e2e/mocha.opts"
   },
   "dependencies": {
-    "react": "15.1.0",
-    "react-native": "^0.27.2"
+    "lodash": "^4.14.1",
+    "react": "~15.4.0-rc.4",
+    "react-native": "0.40.0"
   },
   "devDependencies": {
-    "detox": "file:..",
-    "detox-server": "file:../../detox-server"
+    "mocha": "^3.2.0",
+    "detox": "^4.0.9",
+    "detox-server": "^1.1.0"
   },
   "detox": {
     "session": {
@@ -20,8 +23,8 @@
       "sessionId": "test"
     },
     "ios-simulator": {
-      "app": "ios/build/Build/Products/Debug-iphonesimulator/example.app",
-      "device": "iPhone 6s, iOS 9.3"
+        "app": "ios/build/Build/Products/Release-iphonesimulator/example.app",
+        "device": "iPhone 7 Plus"
     }
   }
 }

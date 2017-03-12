@@ -1,54 +1,85 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import {
   AppRegistry,
-  StyleSheet,
   Text,
   View,
-  TouchableOpacity
+  TouchableOpacity,
+  PushNotificationIOS
 } from 'react-native';
+import * as Screens from './src/Screens';
 
 class example extends Component {
+
   constructor(props) {
     super(props);
     this.state = {
-      greeting: undefined
+      screen: undefined,
+      notification: undefined
     };
   }
-  render() {
-    if (this.state.greeting) return this.renderAfterButton();
+
+  renderScreenButton(title, component) {
     return (
-      <View style={{flex: 1, paddingTop: 20, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={{fontSize: 25, marginBottom: 30}}>
-          Welcome
-        </Text>
-        <TouchableOpacity onPress={this.onButtonPress.bind(this, 'Hello')}>
-          <Text style={{color: 'blue', marginBottom: 20}}>Say Hello</Text>
-        </TouchableOpacity>
-        <TouchableOpacity onPress={this.onButtonPress.bind(this, 'World')}>
-          <Text style={{color: 'blue', marginBottom: 20}}>Say World</Text>
-        </TouchableOpacity>
-      </View>
+      <TouchableOpacity onPress={() => {
+        this.setState({screen: component});
+      }}>
+        <Text style={{color: 'blue', marginBottom: 20}}>{title}</Text>
+      </TouchableOpacity>
     );
   }
-  renderAfterButton() {
+
+  renderAfterPushNotification(text) {
     return (
       <View style={{flex: 1, paddingTop: 20, justifyContent: 'center', alignItems: 'center'}}>
         <Text style={{fontSize: 25}}>
-          {this.state.greeting}!!!
+          {text}
         </Text>
       </View>
     );
   }
-  onButtonPress(greeting) {
-    this.setState({
-      greeting: greeting
-    });
+
+  async componentDidMount() {
+    const result = await PushNotificationIOS.getInitialNotification();
+    if (result) {
+      this.setState({notification: result.getAlert().title});
+    }
+  }
+
+  componentWillMount() {
+    PushNotificationIOS.addEventListener('notification', (notification) => this._onNotification(notification));
+    PushNotificationIOS.addEventListener('localNotification', (notification) => this._onNotification(notification));
+  }
+
+  render() {
+    if (this.state.notification) {
+      return this.renderAfterPushNotification(this.state.notification);
+    }
+
+    if (!this.state.screen) {
+      return (
+        <View style={{flex: 1, paddingTop: 20, justifyContent: 'center', alignItems: 'center'}}>
+          <Text style={{fontSize: 20, marginBottom: 30}}>
+            Choose a test
+          </Text>
+          {this.renderScreenButton('Sanity', Screens.SanityScreen)}
+          {this.renderScreenButton('Matchers', Screens.MatchersScreen)}
+          {this.renderScreenButton('Actions', Screens.ActionsScreen)}
+          {this.renderScreenButton('Assertions', Screens.AssertionsScreen)}
+          {this.renderScreenButton('WaitFor', Screens.WaitForScreen)}
+          {this.renderScreenButton('Stress', Screens.StressScreen)}
+          {this.renderScreenButton('Switch Root', Screens.SwitchRootScreen)}
+          {this.renderScreenButton('Timeouts', Screens.TimeoutsScreen)}
+        </View>
+      );
+    }
+    const Screen = this.state.screen;
+    return (
+      <Screen />
+    );
+  }
+
+  _onNotification(notification) {
+    this.setState({notification: notification.getAlert()});
   }
 }
 

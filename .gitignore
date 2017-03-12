@@ -209,3 +209,7 @@ buck-out/
 \.buckd/
 android/app/libs
 android/keystores/debug.keystore
+ios.tar
+demo-native-ios/ModuleCache
+detox/ios/DetoxBuild
+Detox.framework.tbz

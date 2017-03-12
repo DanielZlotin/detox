@@ -1,22 +1,11 @@
-var detox = require('detox');
-detox.ios.expect.exportGlobals();
-global.simulator = detox.ios.simulator;
-var config = require('../package.json').detox;
+const detox = require('../../src/index');
+const config = require('../package.json').detox;
 
-before(function (done) {
-  detox.config(config.session);
-  detox.connect(done);
+before(async () => {
+  detox.config(config);
+  await detox.start();
 });
 
-before(function (done) {
-  this.timeout(40000);
-  simulator.prepare(config, done);
-});
-
-afterEach(function (done) {
-  detox.waitForTestResult(done);
-});
-
-after(function (done) {
-  detox.cleanup(done);
+after(async () => {
+  await detox.cleanup();
 });

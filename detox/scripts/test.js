@@ -1,14 +1,24 @@
-var shell = require('shelljs');
+require('shelljs/global');
+require('./logger');
 
-shell.echo('\n#################################################################');
-shell.echo('# cd test');
-shell.cd('test');
+let argv = process.argv.slice(2).map(str => str.toLowerCase());
 
-shell.echo('\n#################################################################');
-shell.echo('# npm run e2e');
-if (shell.exec('npm run e2e', {stdio: ['pipe', 'pipe', 'pipe']}).code !== 0) {
-  shell.echo('error: npm run e2e');
-  process.exit(1);
+if(argv.indexOf('nostart') == -1) {
+  exec('npm run start-packager');
+  exec('npm run start-server');
+}
+else {
+  //Remove 'nostart' from array.
+  argv = argv.filter(elem => elem !== 'nostart');
 }
 
-shell.echo('\n');
+if(argv.indexOf('debug') == -1 && argv.indexOf('release') == -1) {
+  //Default behavior is 'debug' if not specified otherwise.
+  argv.push('debug');
+}
+
+if(argv.filter(e => e.startsWith('target=')).length == 0) {
+  argv.push('target=ios-sim');
+}
+
+exec('npm run test-exec -- ' + argv.join(' '));

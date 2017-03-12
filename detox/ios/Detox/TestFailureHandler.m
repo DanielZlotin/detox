@@ -12,8 +12,14 @@
 
 - (void)handleException:(GREYFrameworkException *)exception details:(NSString *)details
 {
-    NSLog(@"Detox Test Failed: %@", exception);
-    if (self.delegate) [self.delegate onTestFailed:[exception description]];
+    NSString *description = [NSString stringWithFormat:@"%@\n%@", [exception description], details];
+    
+    NSLog(@"☣️ DETOX:: Test Failed:\n%@", description);
+    
+    UIWindow* window = [[UIApplication sharedApplication] keyWindow];
+    NSLog(@"☣️ DETOX:: UI Hierarchy on test failure:\n%@", [GREYElementHierarchy hierarchyStringForElement:window]);
+    
+    if (self.delegate) [self.delegate onTestFailed:description];
 }
 
 - (void)setInvocationFile:(NSString *)fileName andInvocationLine:(NSUInteger)lineNumber

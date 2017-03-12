@@ -1,13 +1,11 @@
 describe('Example', function () {
 
   beforeEach(function (done) {
-    simulator.reloadReactNativeApp(done);
+    simulator.reloadReactNative(done);
   });
 
   it('should have welcome screen', function () {
     expect(element(by.label('Welcome'))).toBeVisible();
-    expect(element(by.label('Say Hello'))).toBeVisible();
-    expect(element(by.label('Say World'))).toBeVisible();
   });
 
   it('should show hello screen after tap', function () {
